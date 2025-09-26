@@ -3,431 +3,823 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulatore di Pendoli</title>
+    <title>Pendulum Simulations</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1e1e1e; /* Dark background */
-            color: #e0e0e0; /* Light text */
             margin: 0;
             padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-        h1, h2, h3 {
-            color: #00bcd4; /* Cyan-like color for titles */
-            text-align: center;
-        }
-        .container {
-            background-color: #2d2d2d;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            padding: 25px;
-            margin-bottom: 20px;
-            width: 90%;
-            max-width: 1200px;
-        }
-        .button-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            justify-content: center;
+        h1 {
+            color: #2c3e50;
             margin-bottom: 30px;
         }
-        .button-group button {
+        #app-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
+            background-color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+        }
+        #controls {
+            flex: 1;
+            min-width: 300px;
+            padding: 15px;
+            border-right: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        #simulation-area {
+            flex: 2;
+            min-width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+        canvas {
+            border: 1px solid #ddd;
+            background-color: #fdfdfd;
+            border-radius: 8px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .control-group {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        .control-group input[type="range"],
+        .control-group select,
+        .control-group input[type="number"] {
+            width: calc(100% - 10px);
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .control-group input[type="range"] {
+            -webkit-appearance: none;
+            height: 8px;
+            background: #d3d3d3;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity .2s;
+        }
+        .control-group input[type="range"]:hover {
+            opacity: 1;
+        }
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #007bff;
+            cursor: pointer;
+        }
+        .control-group input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #007bff;
+            cursor: pointer;
+        }
+        .control-group span.value {
+            float: right;
+            font-weight: normal;
+            color: #666;
+        }
+        button {
             background-color: #007bff;
             color: white;
+            padding: 10px 15px;
             border: none;
-            padding: 12px 25px;
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
         }
-        .button-group button:hover {
+        button:hover {
             background-color: #0056b3;
-            transform: translateY(-2px);
         }
-        .button-group button.active {
-            background-color: #00bcd4;
-            box-shadow: 0 0 10px rgba(0, 188, 212, 0.5);
-        }
-        .controls {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+        #results {
             margin-top: 20px;
-            padding: 15px;
-            border: 1px solid #444;
+            padding: 10px;
+            border: 1px dashed #a0a0a0;
             border-radius: 5px;
-            background-color: #3a3a3a;
+            background-color: #e9f7ef;
+            color: #28a745;
+            font-size: 0.9em;
         }
-        .slider-group {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 10px;
+        #results p {
+            margin: 5px 0;
         }
-        .slider-group label {
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #a0a0a0;
-        }
-        .slider-group input[type="range"] {
-            width: 100%;
-            -webkit-appearance: none;
-            height: 8px;
-            background: #555;
-            outline: none;
-            border-radius: 5px;
-            transition: opacity .2s;
-        }
-        .slider-group input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #00bcd4;
-            cursor: pointer;
-            border: 2px solid #e0e0e0;
-        }
-        .slider-group input[type="range"]::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #00bcd4;
-            cursor: pointer;
-            border: 2px solid #e0e0e0;
-        }
-        .slider-value {
-            margin-left: 10px;
-            font-weight: normal;
-            color: #e0e0e0;
-        }
-        .simulate-button {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 18px;
-            margin-top: 20px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            align-self: center;
-        }
-        .simulate-button:hover {
-            background-color: #218838;
-            transform: translateY(-2px);
-        }
-        .output-section {
-            margin-top: 30px;
-            padding: 20px;
-            background-color: #2d2d2d;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            min-height: 300px; /* Ensure space for animation */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-        .output-section h3 {
-            margin-top: 0;
-            margin-bottom: 15px;
-        }
-        #animation-container {
-            width: 100%;
-            height: auto; /* Adjust height based on content */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden; /* Hide potential scrollbars from matplotlib output */
-        }
-        #animation-container iframe {
-            width: 100%;
-            height: 600px; /* Fixed height for the animation iframe */
-            border: none;
-            background-color: #1e1e1e; /* Match body background */
-        }
-        #text-output {
-            white-space: pre-wrap; /* Preserve newlines and spaces */
-            background-color: #1a1a1a;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 20px;
-            width: calc(100% - 30px);
-            box-sizing: border-box;
-            font-family: 'Consolas', 'Courier New', monospace;
-            color: #00ff00; /* Green for console output */
-        }
-        .loading-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 2em;
-            z-index: 10;
-            border-radius: 8px;
-            display: none; /* Hidden by default */
-        }
-        .loading-overlay.active {
-            display: flex;
-        }
-        .error-message {
-            color: #ff4d4d;
-            font-weight: bold;
-            margin-top: 15px;
-            text-align: center;
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
 <body>
-    <h1>Simulatore Interattivo di Pendoli</h1>
+    <h1>Pendulum Simulations</h1>
 
-    <div class="container">
-        <h2>Seleziona il tipo di pendolo da simulare:</h2>
-        <div class="button-group">
-            <button id="btn-simple" data-pendulum-type="simple">Pendolo Semplice</button>
-            <button id="btn-compound" data-pendulum-type="compound">Pendolo Composto</button>
-            <button id="btn-conical" data-pendulum-type="conical">Pendolo Conico</button>
-            <button id="btn-double" data-pendulum-type="double">Doppio Pendolo</button>
-        </div>
-
-        <div id="pendulum-description" style="margin-top: 20px; text-align: center; color: #a0a0a0;">
-            Seleziona un tipo di pendolo per visualizzarne la descrizione e i controlli.
-        </div>
-
-        <div id="controls-container" class="controls" style="display: none;">
-            <h3>Parametri di Simulazione</h3>
-            <div id="sliders-area">
-                <!-- Sliders will be dynamically inserted here -->
+    <div id="app-container">
+        <div id="controls">
+            <div class="control-group">
+                <label for="pendulumType">Select Pendulum Type:</label>
+                <select id="pendulumType">
+                    <option value="simple">Simple Pendulum</option>
+                    <option value="compound">Compound Pendulum</option>
+                    <option value="conical">Conical Pendulum</option>
+                    <option value="double">Double Pendulum</option>
+                </select>
             </div>
-            <button id="simulate-btn" class="simulate-button">Avvia Simulazione</button>
-        </div>
-    </div>
 
-    <div class="container output-section">
-        <h3>Risultati della Simulazione</h3>
-        <div class="loading-overlay" id="loading-overlay">
-            Caricamento simulazione...
+            <div id="common-params" class="control-group">
+                <label>Gravity (g): <span class="value" id="g-value">9.81 m/s²</span></label>
+                <input type="range" id="g" min="1" max="20" value="9.81" step="0.01">
+
+                <label>Duration: <span class="value" id="duration-value">20 s</span></label>
+                <input type="range" id="duration" min="5" max="60" value="20" step="1">
+
+                <label>FPS: <span class="value" id="fps-value">60</span></label>
+                <input type="range" id="fps" min="10" max="120" value="60" step="1">
+            </div>
+
+            <!-- Simple Pendulum Controls -->
+            <div id="simple-pendulum-params" class="control-group">
+                <h3>Simple Pendulum Parameters</h3>
+                <label>Length (L): <span class="value" id="simple-L-value">1.0 m</span></label>
+                <input type="range" id="simple-L" min="0.1" max="5" value="1.0" step="0.1">
+
+                <label>Initial Angle: <span class="value" id="simple-initial_angle_deg-value">90°</span></label>
+                <input type="range" id="simple-initial_angle_deg" min="0" max="179" value="90" step="1">
+
+                <label>Initial Angular Velocity: <span class="value" id="simple-initial_angular_velocity-value">0 rad/s</span></label>
+                <input type="range" id="simple-initial_angular_velocity" min="-5" max="5" value="0" step="0.1">
+
+                <label>Damping (gamma): <span class="value" id="simple-gamma-value">0.0 s⁻¹</span></label>
+                <input type="range" id="simple-gamma" min="0" max="1" value="0.0" step="0.01">
+            </div>
+
+            <!-- Compound Pendulum Controls -->
+            <div id="compound-pendulum-params" class="control-group hidden">
+                <h3>Compound Pendulum Parameters</h3>
+                <label>Mass (M): <span class="value" id="compound-M-value">1.0 kg</span></label>
+                <input type="range" id="compound-M" min="0.1" max="10" value="1.0" step="0.1">
+
+                <label>Distance to CM (d): <span class="value" id="compound-d-value">0.5 m</span></label>
+                <input type="range" id="compound-d" min="0.01" max="2" value="0.5" step="0.01">
+
+                <label>Moment of Inertia (I): <span class="value" id="compound-I-value">0.3 kg·m²</span></label>
+                <input type="range" id="compound-I" min="0.01" max="5" value="0.3" step="0.01">
+
+                <label>Initial Angle: <span class="value" id="compound-initial_angle_deg-value">90°</span></label>
+                <input type="range" id="compound-initial_angle_deg" min="0" max="179" value="90" step="1">
+
+                <label>Initial Angular Velocity: <span class="value" id="compound-initial_angular_velocity-value">0 rad/s</span></label>
+                <input type="range" id="compound-initial_angular_velocity" min="-5" max="5" value="0" step="0.1">
+
+                <label>Damping (gamma): <span class="value" id="compound-gamma-value">0.0 s⁻¹</span></label>
+                <input type="range" id="compound-gamma" min="0" max="1" value="0.0" step="0.01">
+            </div>
+
+            <!-- Conical Pendulum Controls -->
+            <div id="conical-pendulum-params" class="control-group hidden">
+                <h3>Conical Pendulum Parameters</h3>
+                <label>Length (L): <span class="value" id="conical-L-value">1.0 m</span></label>
+                <input type="range" id="conical-L" min="0.1" max="5" value="1.0" step="0.1">
+
+                <label>Cone Angle: <span class="value" id="conical-initial_cone_angle_deg-value">30°</span></label>
+                <input type="range" id="conical-initial_cone_angle_deg" min="1" max="89" value="30" step="1">
+            </div>
+
+            <!-- Double Pendulum Controls -->
+            <div id="double-pendulum-params" class="control-group hidden">
+                <h3>Double Pendulum Parameters</h3>
+                <label>Length 1 (L1): <span class="value" id="double-L1-value">1.0 m</span></label>
+                <input type="range" id="double-L1" min="0.1" max="3" value="1.0" step="0.1">
+
+                <label>Mass 1 (M1): <span class="value" id="double-M1-value">1.0 kg</span></label>
+                <input type="range" id="double-M1" min="0.1" max="5" value="1.0" step="0.1">
+
+                <label>Initial Angle 1: <span class="value" id="double-initial_angle1_deg-value">90°</span></label>
+                <input type="range" id="double-initial_angle1_deg" min="0" max="179" value="90" step="1">
+
+                <label>Length 2 (L2): <span class="value" id="double-L2-value">1.0 m</span></label>
+                <input type="range" id="double-L2" min="0.1" max="3" value="1.0" step="0.1">
+
+                <label>Mass 2 (M2): <span class="value" id="double-M2-value">1.0 kg</span></label>
+                <input type="range" id="double-M2" min="0.1" max="5" value="1.0" step="0.1">
+
+                <label>Initial Angle 2: <span class="value" id="double-initial_angle2_deg-value">90°</span></label>
+                <input type="range" id="double-initial_angle2_deg" min="0" max="179" value="90" step="1">
+            </div>
+
+            <button id="startSimulation">Start Simulation</button>
+            <button id="stopSimulation" style="background-color: #dc3545;">Stop Simulation</button>
+
+            <div id="results">
+                <p><strong>Simulation Results:</strong></p>
+                <p id="period-info">Period (small angle approx): N/A</p>
+                <p id="conical-period-info" class="hidden">Conical Period: N/A</p>
+            </div>
         </div>
-        <div id="animation-container">
-            <!-- Animation will be injected here -->
+
+        <div id="simulation-area">
+            <canvas id="pendulumCanvas" width="600" height="600"></canvas>
         </div>
-        <div id="text-output">
-            <!-- Text output (periods, etc.) will be injected here -->
-        </div>
-        <div id="error-message" class="error-message" style="display: none;"></div>
     </div>
 
     <script>
-        const pendulumTypes = {
-            simple: {
-                description: `
-                    --- Pendolo Semplice Ideale ---
-                    Il periodo è indipendente dalla massa e dall'ampiezza per piccoli angoli.
-                    Per grandi angoli, il periodo aumenta e il moto non è più armonico semplice.
-                    Aggiungendo smorzamento, l'ampiezza diminuisce nel tempo.
-                `,
-                params: [
-                    { id: 'L', label: 'Lunghezza L (m)', type: 'range', min: 0.1, max: 5.0, step: 0.1, value: 1.0 },
-                    { id: 'theta_0_deg', label: 'Angolo Iniziale (deg)', type: 'range', min: 5, max: 170, step: 5, value: 30 },
-                    { id: 'g', label: 'Gravità g (m/s²)', type: 'range', min: 1.0, max: 20.0, step: 0.1, value: 9.81 },
-                    { id: 'damping_coeff', label: 'Smorzamento γ', type: 'range', min: 0.0, max: 0.5, step: 0.01, value: 0.0 }
-                ],
-                endpoint: '/simulate_simple'
-            },
-            compound: {
-                description: `
-                    --- Pendolo Composto (Fisico) ---
-                    Un corpo rigido che oscilla attorno a un perno non passante per il suo centro di massa.
-                    Il periodo dipende dal momento d'inerzia (I), massa (M) e distanza del CM dal perno (d).
-                    Esempio: per una barra sottile di lunghezza L_bar e massa M, pivotata a un'estremità, I = (1/3) * M * L_bar^2 e d = L_bar / 2.
-                `,
-                params: [
-                    { id: 'M', label: 'Massa M (kg)', type: 'range', min: 0.1, max: 10.0, step: 0.1, value: 1.0 },
-                    { id: 'd', label: 'Distanza CM (m)', type: 'range', min: 0.1, max: 2.0, step: 0.05, value: 0.5 },
-                    { id: 'I', label: 'Momento Inerzia I (kgm²)', type: 'range', min: 0.01, max: 5.0, step: 0.01, value: 0.1 },
-                    { id: 'theta_0_deg', label: 'Angolo Iniziale (deg)', type: 'range', min: 5, max: 90, step: 5, value: 30 },
-                    { id: 'g', label: 'Gravità g (m/s²)', type: 'range', min: 1.0, max: 20.0, step: 0.1, value: 9.81 }
-                ],
-                endpoint: '/simulate_compound'
-            },
-            conical: {
-                description: `
-                    --- Pendolo Conico ---
-                    La massa si muove in un cerchio orizzontale, mantenendo un angolo costante con la verticale.
-                    Non è un'oscillazione, ma una rotazione. Il periodo dipende dall'angolo conico.
-                `,
-                params: [
-                    { id: 'L', label: 'Lunghezza L (m)', type: 'range', min: 0.1, max: 5.0, step: 0.1, value: 1.0 },
-                    { id: 'theta_conical_deg', label: 'Angolo Conico (deg)', type: 'range', min: 5, max: 85, step: 5, value: 30 },
-                    { id: 'g', label: 'Gravità g (m/s²)', type: 'range', min: 1.0, max: 20.0, step: 0.1, value: 9.81 }
-                ],
-                endpoint: '/simulate_conical'
-            },
-            double: {
-                description: `
-                    --- Doppio Pendolo ---
-                    Un sistema non lineare e caotico. Piccole variazioni nelle condizioni iniziali portano a traiettorie drasticamente diverse.
-                    Osserva come il percorso del secondo pendolo diventa imprevedibile.
-                `,
-                params: [
-                    { id: 'L1', label: 'Lunghezza L1 (m)', type: 'range', min: 0.1, max: 2.0, step: 0.1, value: 1.0 },
-                    { id: 'L2', label: 'Lunghezza L2 (m)', type: 'range', min: 0.1, max: 2.0, step: 0.1, value: 1.0 },
-                    { id: 'M1', label: 'Massa M1 (kg)', type: 'range', min: 0.1, max: 5.0, step: 0.1, value: 1.0 },
-                    { id: 'M2', label: 'Massa M2 (kg)', type: 'range', min: 0.1, max: 5.0, step: 0.1, value: 1.0 },
-                    { id: 'theta1_0_deg', label: 'Angolo Iniziale θ1 (deg)', type: 'range', min: 0, max: 179, step: 1, value: 90 },
-                    { id: 'theta2_0_deg', label: 'Angolo Iniziale θ2 (deg)', type: 'range', min: 0, max: 179, step: 1, value: 90 },
-                    { id: 'g', label: 'Gravità g (m/s²)', type: 'range', min: 1.0, max: 20.0, step: 0.1, value: 9.81 }
-                ],
-                endpoint: '/simulate_double'
+        const canvas = document.getElementById('pendulumCanvas');
+        const ctx = canvas.getContext('2d');
+        const CANVAS_WIDTH = canvas.width;
+        const CANVAS_HEIGHT = canvas.height;
+        const CENTER_X = CANVAS_WIDTH / 2;
+        const CENTER_Y = CANVAS_HEIGHT / 4; // Pivot point for pendulums
+
+        let animationFrameId;
+        let currentFrame = 0;
+        let simulationData = {};
+        let currentPendulumType = 'simple';
+
+        // --- Utility Functions ---
+        function degToRad(degrees) {
+            return degrees * Math.PI / 180;
+        }
+
+        function radToDeg(radians) {
+            return radians * 180 / Math.PI;
+        }
+
+        // --- RK4 Solver (4th Order Runge-Kutta) ---
+        // A simplified RK4 for fixed step size, suitable for this simulation.
+        // For adaptive step size like scipy's solve_ivp, a more complex implementation is needed.
+        function solveRK4(ode_func, y0, t_span, args, t_eval) {
+            const t_start = t_span[0];
+            const t_end = t_span[1];
+            const h = t_eval[1] - t_eval[0]; // Fixed step size
+
+            let y = [...y0]; // Current state
+            const results = [y0.slice()]; // Store initial state
+
+            for (let i = 0; i < t_eval.length - 1; i++) {
+                const t = t_eval[i];
+
+                const k1 = ode_func(t, y, ...args).map(val => val * h);
+                const y1 = y.map((val, idx) => val + k1[idx] / 2);
+
+                const k2 = ode_func(t + h / 2, y1, ...args).map(val => val * h);
+                const y2 = y.map((val, idx) => val + k2[idx] / 2);
+
+                const k3 = ode_func(t + h / 2, y2, ...args).map(val => val * h);
+                const y3 = y.map((val, idx) => val + k3[idx]);
+
+                const k4 = ode_func(t + h, y3, ...args).map(val => val * h);
+
+                y = y.map((val, idx) => val + (k1[idx] + 2 * k2[idx] + 2 * k3[idx] + k4[idx]) / 6);
+                results.push(y.slice());
             }
-        };
-
-        let currentPendulumType = null;
-        const BASE_URL = 'http://127.0.0.1:5000'; // Indirizzo del server Flask
-
-        const pendulumDescriptionDiv = document.getElementById('pendulum-description');
-        const controlsContainer = document.getElementById('controls-container');
-        const slidersArea = document.getElementById('sliders-area');
-        const simulateBtn = document.getElementById('simulate-btn');
-        const animationContainer = document.getElementById('animation-container');
-        const textOutput = document.getElementById('text-output');
-        const loadingOverlay = document.getElementById('loading-overlay');
-        const errorMessageDiv = document.getElementById('error-message');
-        const buttonGroup = document.querySelector('.button-group');
-
-        function createSlider(param) {
-            const sliderGroup = document.createElement('div');
-            sliderGroup.className = 'slider-group';
-
-            const label = document.createElement('label');
-            label.htmlFor = param.id;
-            label.innerHTML = `${param.label}: <span id="${param.id}-value" class="slider-value">${param.value}</span>`;
-
-            const input = document.createElement('input');
-            input.type = param.type;
-            input.id = param.id;
-            input.min = param.min;
-            input.max = param.max;
-            input.step = param.step;
-            input.value = param.value;
-
-            input.addEventListener('input', () => {
-                document.getElementById(`${param.id}-value`).textContent = input.value;
-            });
-
-            sliderGroup.appendChild(label);
-            sliderGroup.appendChild(input);
-            return sliderGroup;
+            return { y: results };
         }
 
-        function loadPendulumControls(type) {
-            currentPendulumType = type;
-            const pendulum = pendulumTypes[type];
+        // --- ODE Definitions ---
 
-            // Update active button
-            document.querySelectorAll('.button-group button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.getElementById(`btn-${type}`).classList.add('active');
-
-            pendulumDescriptionDiv.innerHTML = `<pre>${pendulum.description}</pre>`;
-            slidersArea.innerHTML = '';
-            pendulum.params.forEach(param => {
-                slidersArea.appendChild(createSlider(param));
-            });
-            controlsContainer.style.display = 'flex';
-            errorMessageDiv.style.display = 'none';
-            errorMessageDiv.textContent = '';
-            animationContainer.innerHTML = '';
-            textOutput.textContent = '';
+        // 1. Simple Pendulum
+        function simple_pendulum_ode(t, y, L, g, gamma) {
+            const [theta, omega] = y;
+            const dtheta_dt = omega;
+            const domega_dt = - (g / L) * Math.sin(theta) - gamma * omega;
+            return [dtheta_dt, domega_dt];
         }
 
-        async function simulatePendulum() {
-            if (!currentPendulumType) {
-                errorMessageDiv.textContent = 'Seleziona un tipo di pendolo prima di simulare.';
-                errorMessageDiv.style.display = 'block';
+        function simulate_simple_pendulum(L, g, initial_angle_deg, initial_angular_velocity, gamma, duration, fps) {
+            const initial_angle_rad = degToRad(initial_angle_deg);
+            const y0 = [initial_angle_rad, initial_angular_velocity];
+            const t_eval = Array.from({ length: Math.floor(duration * fps) + 1 }, (_, i) => i / fps);
+
+            const sol = solveRK4(
+                simple_pendulum_ode,
+                y0,
+                [0, duration],
+                [L, g, gamma],
+                t_eval
+            );
+
+            const theta = sol.y.map(state => state[0]);
+            const x = theta.map(t => L * Math.sin(t));
+            const y = theta.map(t => -L * Math.cos(t));
+
+            const period_small_angle = 2 * Math.PI * Math.sqrt(L / g);
+
+            return { t_eval, x, y, theta, period_small_angle };
+        }
+
+        // 2. Compound Pendulum
+        function compound_pendulum_ode(t, y, M, d, I, g, gamma) {
+            const [theta, omega] = y;
+            const dtheta_dt = omega;
+            const domega_dt = - (M * g * d / I) * Math.sin(theta) - gamma * omega;
+            return [dtheta_dt, domega_dt];
+        }
+
+        function simulate_compound_pendulum(M, d, I, g, initial_angle_deg, initial_angular_velocity, gamma, duration, fps) {
+            const initial_angle_rad = degToRad(initial_angle_deg);
+            const y0 = [initial_angle_rad, initial_angular_velocity];
+            const t_eval = Array.from({ length: Math.floor(duration * fps) + 1 }, (_, i) => i / fps);
+
+            const sol = solveRK4(
+                compound_pendulum_ode,
+                y0,
+                [0, duration],
+                [M, d, I, g, gamma],
+                t_eval
+            );
+
+            const theta = sol.y.map(state => state[0]);
+            const L_eq = (M * d !== 0) ? I / (M * d) : 1.0; // Equivalent length for visualization
+            const x = theta.map(t => L_eq * Math.sin(t));
+            const y = theta.map(t => -L_eq * Math.cos(t));
+
+            const period_compound = (M * g * d !== 0) ? 2 * Math.PI * Math.sqrt(I / (M * g * d)) : Infinity;
+
+            return { t_eval, x, y, theta, L_eq, period_compound };
+        }
+
+        // 3. Conical Pendulum
+        function conical_pendulum_ode(t, y, L, g, initial_cone_angle_rad) {
+            const [phi, dphi_dt] = y;
+            let omega_conical;
+            if (initial_cone_angle_rad === 0) {
+                omega_conical = 0;
+            } else {
+                omega_conical = Math.sqrt(g / (L * Math.cos(initial_cone_angle_rad)));
+            }
+            return [omega_conical, 0]; // dphi/dt is constant, d(dphi/dt)/dt is 0
+        }
+
+        function simulate_conical_pendulum(L, g, initial_cone_angle_deg, duration, fps) {
+            const initial_cone_angle_rad = degToRad(initial_cone_angle_deg);
+
+            let omega_conical;
+            if (initial_cone_angle_rad === 0) {
+                omega_conical = 0;
+            } else {
+                omega_conical = Math.sqrt(g / (L * Math.cos(initial_cone_angle_rad)));
+            }
+
+            const y0 = [0, omega_conical]; // Start at phi=0 with calculated angular velocity
+            const t_eval = Array.from({ length: Math.floor(duration * fps) + 1 }, (_, i) => i / fps);
+
+            const sol = solveRK4(
+                conical_pendulum_ode,
+                y0,
+                [0, duration],
+                [L, g, initial_cone_angle_rad],
+                t_eval
+            );
+
+            const phi = sol.y.map(state => state[0]);
+
+            // Convert to Cartesian coordinates (3D) for visualization
+            const x = phi.map(p => L * Math.sin(initial_cone_angle_rad) * Math.cos(p));
+            const y = phi.map(p => L * Math.sin(initial_cone_angle_rad) * Math.sin(p));
+            const z = phi.map(p => -L * Math.cos(initial_cone_angle_rad)); // Z is negative downwards
+
+            const period_conical = (initial_cone_angle_rad < Math.PI / 2) ? 2 * Math.PI * Math.sqrt(L * Math.cos(initial_cone_angle_rad) / g) : Infinity;
+
+            return { t_eval, x, y, z, initial_cone_angle_rad, period_conical };
+        }
+
+        // 4. Double Pendulum
+        function double_pendulum_ode(t, y, L1, L2, M1, M2, g) {
+            const [theta1, omega1, theta2, omega2] = y;
+
+            const delta = theta1 - theta2;
+
+            const dtheta1_dt = omega1;
+            const dtheta2_dt = omega2;
+
+            const den1 = L1 * (2 * M1 + M2 - M2 * Math.cos(2 * delta));
+            const domega1_dt = (-g * (2 * M1 + M2) * Math.sin(theta1) - M2 * g * Math.sin(theta1 - 2 * theta2) - 2 * Math.sin(delta) * M2 * (omega2**2 * L2 + omega1**2 * L1 * Math.cos(delta))) / den1;
+
+            const den2 = L2 * (2 * M1 + M2 - M2 * Math.cos(2 * delta));
+            const domega2_dt = (2 * Math.sin(delta) * (omega1**2 * L1 * (M1 + M2) + g * (M1 + M2) * Math.cos(theta1) + omega2**2 * L2 * M2 * Math.cos(delta))) / den2;
+
+            return [dtheta1_dt, domega1_dt, dtheta2_dt, domega2_dt];
+        }
+
+        function simulate_double_pendulum(L1, L2, M1, M2, initial_angle1_deg, initial_angle2_deg, duration, fps, g) {
+            const initial_angle1_rad = degToRad(initial_angle1_deg);
+            const initial_angle2_rad = degToRad(initial_angle2_deg);
+
+            const y0 = [initial_angle1_rad, 0, initial_angle2_rad, 0]; // Start with zero angular velocities
+            const t_eval = Array.from({ length: Math.floor(duration * fps) + 1 }, (_, i) => i / fps);
+
+            const sol = solveRK4(
+                double_pendulum_ode,
+                y0,
+                [0, duration],
+                [L1, L2, M1, M2, g],
+                t_eval
+            );
+
+            const theta1 = sol.y.map(state => state[0]);
+            const theta2 = sol.y.map(state => state[2]);
+
+            const x1 = theta1.map(t => L1 * Math.sin(t));
+            const y1 = theta1.map(t => -L1 * Math.cos(t));
+
+            const x2 = theta2.map((t2, i) => x1[i] + L2 * Math.sin(t2));
+            const y2 = theta2.map((t2, i) => y1[i] - L2 * Math.cos(t2));
+
+            return { t_eval, x1, y1, x2, y2 };
+        }
+
+        // --- Drawing Functions ---
+        const SCALE_FACTOR = 100; // Pixels per meter
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            ctx.fillStyle = '#fdfdfd';
+            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        }
+
+        function drawSimplePendulum(data, frame) {
+            clearCanvas();
+            const x = data.x[frame] * SCALE_FACTOR + CENTER_X;
+            const y = data.y[frame] * SCALE_FACTOR + CENTER_Y;
+
+            // Pivot
+            ctx.beginPath();
+            ctx.arc(CENTER_X, CENTER_Y, 5, 0, 2 * Math.PI);
+            ctx.fillStyle = '#333';
+            ctx.fill();
+
+            // Rod
+            ctx.beginPath();
+            ctx.moveTo(CENTER_X, CENTER_Y);
+            ctx.lineTo(x, y);
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Bob
+            ctx.beginPath();
+            ctx.arc(x, y, 15, 0, 2 * Math.PI);
+            ctx.fillStyle = '#007bff';
+            ctx.fill();
+            ctx.strokeStyle = '#0056b3';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+
+        function drawCompoundPendulum(data, frame) {
+            clearCanvas();
+            const x = data.x[frame] * SCALE_FACTOR + CENTER_X;
+            const y = data.y[frame] * SCALE_FACTOR + CENTER_Y;
+
+            // Pivot
+            ctx.beginPath();
+            ctx.arc(CENTER_X, CENTER_Y, 5, 0, 2 * Math.PI);
+            ctx.fillStyle = '#333';
+            ctx.fill();
+
+            // Rod (represented by equivalent length)
+            ctx.beginPath();
+            ctx.moveTo(CENTER_X, CENTER_Y);
+            ctx.lineTo(x, y);
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 4; // Thicker to represent a body
+            ctx.stroke();
+
+            // Center of Mass (bob)
+            ctx.beginPath();
+            ctx.arc(x, y, 20, 0, 2 * Math.PI); // Larger bob for compound
+            ctx.fillStyle = '#28a745';
+            ctx.fill();
+            ctx.strokeStyle = '#1e7e34';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+
+        function drawConicalPendulum(data, frame) {
+            clearCanvas();
+            const x = data.x[frame] * SCALE_FACTOR + CENTER_X;
+            const y = data.y[frame] * SCALE_FACTOR + CENTER_Y;
+            const z = data.z[frame] * SCALE_FACTOR; // Z-coordinate for perspective
+
+            // Simple perspective effect: scale and offset based on Z
+            const perspectiveFactor = 1 + z / (SCALE_FACTOR * 5); // Adjust 5 for desired perspective
+            const bobRadius = 15 * perspectiveFactor;
+            const bobYOffset = z * 0.5; // Adjust for vertical perspective shift
+
+            // Pivot
+            ctx.beginPath();
+            ctx.arc(CENTER_X, CENTER_Y, 5, 0, 2 * Math.PI);
+            ctx.fillStyle = '#333';
+            ctx.fill();
+
+            // Rod
+            ctx.beginPath();
+            ctx.moveTo(CENTER_X, CENTER_Y);
+            ctx.lineTo(x, y + bobYOffset); // Apply Y offset for perspective
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Bob
+            ctx.beginPath();
+            ctx.arc(x, y + bobYOffset, bobRadius, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ffc107';
+            ctx.fill();
+            ctx.strokeStyle = '#e0a800';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // Draw the circular path on the "floor" (below the pivot)
+            ctx.beginPath();
+            ctx.arc(CENTER_X, CENTER_Y + data.L * Math.cos(data.initial_cone_angle_rad) * SCALE_FACTOR,
+                    data.L * Math.sin(data.initial_cone_angle_rad) * SCALE_FACTOR, 0, 2 * Math.PI);
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+
+        function drawDoublePendulum(data, frame) {
+            clearCanvas();
+            const x1 = data.x1[frame] * SCALE_FACTOR + CENTER_X;
+            const y1 = data.y1[frame] * SCALE_FACTOR + CENTER_Y;
+            const x2 = data.x2[frame] * SCALE_FACTOR + CENTER_X;
+            const y2 = data.y2[frame] * SCALE_FACTOR + CENTER_Y;
+
+            // Pivot
+            ctx.beginPath();
+            ctx.arc(CENTER_X, CENTER_Y, 5, 0, 2 * Math.PI);
+            ctx.fillStyle = '#333';
+            ctx.fill();
+
+            // Rod 1
+            ctx.beginPath();
+            ctx.moveTo(CENTER_X, CENTER_Y);
+            ctx.lineTo(x1, y1);
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Bob 1
+            ctx.beginPath();
+            ctx.arc(x1, y1, 15, 0, 2 * Math.PI);
+            ctx.fillStyle = '#17a2b8';
+            ctx.fill();
+            ctx.strokeStyle = '#138496';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // Rod 2
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Bob 2
+            ctx.beginPath();
+            ctx.arc(x2, y2, 15, 0, 2 * Math.PI);
+            ctx.fillStyle = '#dc3545';
+            ctx.fill();
+            ctx.strokeStyle = '#c82333';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+
+        // --- Animation Loop ---
+        function animate() {
+            if (!simulationData.t_eval || simulationData.t_eval.length === 0) {
+                console.warn("No simulation data to animate.");
                 return;
             }
 
-            loadingOverlay.classList.add('active');
-            errorMessageDiv.style.display = 'none';
-            errorMessageDiv.textContent = '';
-            animationContainer.innerHTML = '';
-            textOutput.textContent = '';
+            const totalFrames = simulationData.t_eval.length;
+            const drawFunction = getDrawFunction(currentPendulumType);
 
-            const pendulum = pendulumTypes[currentPendulumType];
-            const params = {};
-            pendulum.params.forEach(param => {
-                const input = document.getElementById(param.id);
-                // Correggi: Converti sempre a float per coerenza con le grandezze fisiche
-                params[param.id] = parseFloat(input.value);
-            });
+            drawFunction(simulationData, currentFrame);
 
-            try {
-                const response = await fetch(`${BASE_URL}${pendulum.endpoint}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(params)
-                });
+            currentFrame = (currentFrame + 1) % totalFrames;
+            animationFrameId = requestAnimationFrame(animate);
+        }
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                
-                if (data.animation_html) {
-                    // Create an iframe to isolate the animation's JS and CSS
-                    const iframe = document.createElement('iframe');
-                    iframe.srcdoc = data.animation_html;
-                    animationContainer.innerHTML = ''; // Clear previous animation
-                    animationContainer.appendChild(iframe);
-                } else {
-                    animationContainer.innerHTML = '<p style="text-align: center; color: #a0a0a0;">Nessuna animazione generata.</p>';
-                }
-
-                textOutput.textContent = data.text_output || 'Nessun output testuale.';
-
-            } catch (error) {
-                console.error('Errore durante la simulazione:', error);
-                errorMessageDiv.textContent = `Errore durante la simulazione: ${error.message}`;
-                errorMessageDiv.style.display = 'block';
-                animationContainer.innerHTML = '';
-                textOutput.textContent = '';
-            } finally {
-                loadingOverlay.classList.remove('active');
+        function stopAnimation() {
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
             }
         }
 
-        // Event Listeners
-        buttonGroup.addEventListener('click', (event) => {
-            if (event.target.tagName === 'BUTTON') {
-                const type = event.target.dataset.pendulumType;
-                if (type) {
-                    loadPendulumControls(type);
+        // --- Control and Simulation Logic ---
+        const pendulumTypeSelect = document.getElementById('pendulumType');
+        const commonParamsDiv = document.getElementById('common-params');
+        const simpleParamsDiv = document.getElementById('simple-pendulum-params');
+        const compoundParamsDiv = document.getElementById('compound-pendulum-params');
+        const conicalParamsDiv = document.getElementById('conical-pendulum-params');
+        const doubleParamsDiv = document.getElementById('double-pendulum-params');
+        const startButton = document.getElementById('startSimulation');
+        const stopButton = document.getElementById('stopSimulation');
+        const periodInfo = document.getElementById('period-info');
+        const conicalPeriodInfo = document.getElementById('conical-period-info');
+
+        const allParamDivs = {
+            'simple': simpleParamsDiv,
+            'compound': compoundParamsDiv,
+            'conical': conicalParamsDiv,
+            'double': doubleParamsDiv
+        };
+
+        function updateControlVisibility() {
+            for (const type in allParamDivs) {
+                if (type === currentPendulumType) {
+                    allParamDivs[type].classList.remove('hidden');
+                } else {
+                    allParamDivs[type].classList.add('hidden');
                 }
+            }
+            // Specific result info visibility
+            if (currentPendulumType === 'conical') {
+                periodInfo.classList.add('hidden');
+                conicalPeriodInfo.classList.remove('hidden');
+            } else {
+                periodInfo.classList.remove('hidden');
+                conicalPeriodInfo.classList.add('hidden');
+            }
+        }
+
+        function getParams() {
+            const params = {
+                g: parseFloat(document.getElementById('g').value),
+                duration: parseFloat(document.getElementById('duration').value),
+                fps: parseInt(document.getElementById('fps').value)
+            };
+
+            switch (currentPendulumType) {
+                case 'simple':
+                    params.L = parseFloat(document.getElementById('simple-L').value);
+                    params.initial_angle_deg = parseFloat(document.getElementById('simple-initial_angle_deg').value);
+                    params.initial_angular_velocity = parseFloat(document.getElementById('simple-initial_angular_velocity').value);
+                    params.gamma = parseFloat(document.getElementById('simple-gamma').value);
+                    break;
+                case 'compound':
+                    params.M = parseFloat(document.getElementById('compound-M').value);
+                    params.d = parseFloat(document.getElementById('compound-d').value);
+                    params.I = parseFloat(document.getElementById('compound-I').value);
+                    params.initial_angle_deg = parseFloat(document.getElementById('compound-initial_angle_deg').value);
+                    params.initial_angular_velocity = parseFloat(document.getElementById('compound-initial_angular_velocity').value);
+                    params.gamma = parseFloat(document.getElementById('compound-gamma').value);
+                    break;
+                case 'conical':
+                    params.L = parseFloat(document.getElementById('conical-L').value);
+                    params.initial_cone_angle_deg = parseFloat(document.getElementById('conical-initial_cone_angle_deg').value);
+                    break;
+                case 'double':
+                    params.L1 = parseFloat(document.getElementById('double-L1').value);
+                    params.M1 = parseFloat(document.getElementById('double-M1').value);
+                    params.initial_angle1_deg = parseFloat(document.getElementById('double-initial_angle1_deg').value);
+                    params.L2 = parseFloat(document.getElementById('double-L2').value);
+                    params.M2 = parseFloat(document.getElementById('double-M2').value);
+                    params.initial_angle2_deg = parseFloat(document.getElementById('double-initial_angle2_deg').value);
+                    break;
+            }
+            return params;
+        }
+
+        function getSimulateFunction(type) {
+            switch (type) {
+                case 'simple': return simulate_simple_pendulum;
+                case 'compound': return simulate_compound_pendulum;
+                case 'conical': return simulate_conical_pendulum;
+                case 'double': return simulate_double_pendulum;
+                default: return null;
+            }
+        }
+
+        function getDrawFunction(type) {
+            switch (type) {
+                case 'simple': return drawSimplePendulum;
+                case 'compound': return drawCompoundPendulum;
+                case 'conical': return drawConicalPendulum;
+                case 'double': return drawDoublePendulum;
+                default: return null;
+            }
+        }
+
+        function runSimulation() {
+            stopAnimation();
+            currentFrame = 0;
+            const params = getParams();
+            const simulateFunc = getSimulateFunction(currentPendulumType);
+
+            if (!simulateFunc) {
+                console.error("Invalid pendulum type selected.");
+                return;
+            }
+
+            switch (currentPendulumType) {
+                case 'simple':
+                    simulationData = simulateFunc(params.L, params.g, params.initial_angle_deg, params.initial_angular_velocity, params.gamma, params.duration, params.fps);
+                    periodInfo.textContent = `Period (small angle approx): ${simulationData.period_small_angle.toFixed(3)} s`;
+                    break;
+                case 'compound':
+                    simulationData = simulateFunc(params.M, params.d, params.I, params.g, params.initial_angle_deg, params.initial_angular_velocity, params.gamma, params.duration, params.fps);
+                    periodInfo.textContent = `Period (small angle approx): ${simulationData.period_compound.toFixed(3)} s`;
+                    break;
+                case 'conical':
+                    simulationData = simulateFunc(params.L, params.g, params.initial_cone_angle_deg, params.duration, params.fps);
+                    conicalPeriodInfo.textContent = `Conical Period: ${simulationData.period_conical.toFixed(3)} s`;
+                    // Store L and initial_cone_angle_rad for drawing
+                    simulationData.L = params.L;
+                    simulationData.initial_cone_angle_rad = degToRad(params.initial_cone_angle_deg);
+                    break;
+                case 'double':
+                    simulationData = simulateFunc(params.L1, params.L2, params.M1, params.M2, params.initial_angle1_deg, params.initial_angle2_deg, params.duration, params.fps, params.g);
+                    periodInfo.textContent = `Double pendulums exhibit chaotic motion, no simple period.`;
+                    break;
+            }
+            animate();
+        }
+
+        // --- Event Listeners ---
+        pendulumTypeSelect.addEventListener('change', (event) => {
+            currentPendulumType = event.target.value;
+            updateControlVisibility();
+            runSimulation(); // Re-run simulation with new type
+        });
+
+        // Update value displays for sliders
+        document.querySelectorAll('input[type="range"]').forEach(slider => {
+            const valueSpan = document.getElementById(slider.id + '-value');
+            if (valueSpan) {
+                slider.addEventListener('input', () => {
+                    let unit = '';
+                    if (slider.id.includes('angle')) unit = '°';
+                    else if (slider.id.includes('L')) unit = ' m';
+                    else if (slider.id.includes('M')) unit = ' kg';
+                    else if (slider.id.includes('d')) unit = ' m';
+                    else if (slider.id.includes('I')) unit = ' kg·m²';
+                    else if (slider.id.includes('gamma')) unit = ' s⁻¹';
+                    else if (slider.id === 'g') unit = ' m/s²';
+                    else if (slider.id === 'duration') unit = ' s';
+                    else if (slider.id === 'fps') unit = '';
+
+                    valueSpan.textContent = `${slider.value}${unit}`;
+                });
+                slider.addEventListener('change', runSimulation); // Re-run on change
             }
         });
 
-        simulateBtn.addEventListener('click', simulatePendulum);
+        startButton.addEventListener('click', runSimulation);
+        stopButton.addEventListener('click', stopAnimation);
 
-        // Initial load (optional, could select a default pendulum)
-        // loadPendulumControls('simple'); 
+        // Initial setup
+        updateControlVisibility();
+        // Initialize slider value displays
+        document.querySelectorAll('input[type="range"]').forEach(slider => {
+            const valueSpan = document.getElementById(slider.id + '-value');
+            if (valueSpan) {
+                let unit = '';
+                if (slider.id.includes('angle')) unit = '°';
+                else if (slider.id.includes('L')) unit = ' m';
+                else if (slider.id.includes('M')) unit = ' kg';
+                else if (slider.id.includes('d')) unit = ' m';
+                else if (slider.id.includes('I')) unit = ' kg·m²';
+                else if (slider.id.includes('gamma')) unit = ' s⁻¹';
+                else if (slider.id === 'g') unit = ' m/s²';
+                else if (slider.id === 'duration') unit = ' s';
+                else if (slider.id === 'fps') unit = '';
+                valueSpan.textContent = `${slider.value}${unit}`;
+            }
+        });
+        runSimulation(); // Run initial simulation
     </script>
 </body>
 </html>

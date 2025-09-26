@@ -56,7 +56,7 @@ function solveRK4(ode_func, y0, t_span, args, t_eval) {
 function simple_pendulum_ode(t, y, L, g, gamma) {
     const [theta, omega] = y;
     const dtheta_dt = omega;
-    const domega_dt = - (g / L) * Math.sin(theta) - gamma * omega;
+    const domega_dt = - (-g / L) * Math.sin(theta) - gamma * omega;
     return [dtheta_dt, domega_dt];
 }
 
@@ -69,7 +69,7 @@ function simulate_simple_pendulum(L, g, initial_angle_deg, initial_angular_veloc
         simple_pendulum_ode,
         y0,
         [0, duration],
-        [L, g, gamma],
+        [L, -g, gamma],
         t_eval
     );
 
@@ -86,7 +86,7 @@ function simulate_simple_pendulum(L, g, initial_angle_deg, initial_angular_veloc
 function compound_pendulum_ode(t, y, M, d, I, g, gamma) {
     const [theta, omega] = y;
     const dtheta_dt = omega;
-    const domega_dt = - (M * g * d / I) * Math.sin(theta) - gamma * omega;
+    const domega_dt = - (M * (-g) * d / I) * Math.sin(theta) - gamma * omega;
     return [dtheta_dt, domega_dt];
 }
 
@@ -99,7 +99,7 @@ function simulate_compound_pendulum(M, d, I, g, initial_angle_deg, initial_angul
         compound_pendulum_ode,
         y0,
         [0, duration],
-        [M, d, I, g, gamma],
+        [M, d, I, -g, gamma],
         t_eval
     );
 

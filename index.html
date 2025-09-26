@@ -449,10 +449,10 @@
             const theta2 = sol.y.map(state => state[2]);
 
             const x1 = theta1.map(t => L1 * Math.sin(t));
-            const y1 = theta1.map(t => -L1 * Math.cos(t));
+            const y1 = theta1.map(t => +L1 * Math.cos(t));
 
             const x2 = theta2.map((t2, i) => x1[i] + L2 * Math.sin(t2));
-            const y2 = theta2.map((t2, i) => y1[i] - L2 * Math.cos(t2));
+            const y2 = theta2.map((t2, i) => y1[i] + L2 * Math.cos(t2));
 
             return { t_eval, x1, y1, x2, y2 };
         }

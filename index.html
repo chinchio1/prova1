@@ -329,7 +329,7 @@
 
             const theta = sol.y.map(state => state[0]);
             const x = theta.map(t => L * Math.sin(t));
-            const y = theta.map(t => -L * Math.cos(t));
+            const y = theta.map(t => L * Math.cos(t));
 
             const period_small_angle = 2 * Math.PI * Math.sqrt(L / g);
 

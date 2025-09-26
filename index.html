@@ -360,7 +360,7 @@
             const theta = sol.y.map(state => state[0]);
             const L_eq = (M * d !== 0) ? I / (M * d) : 1.0; // Equivalent length for visualization
             const x = theta.map(t => L_eq * Math.sin(t));
-            const y = theta.map(t => -L_eq * Math.cos(t));
+            const y = theta.map(t => L_eq * Math.cos(t));
 
             const period_compound = (M * g * d !== 0) ? 2 * Math.PI * Math.sqrt(I / (M * g * d)) : Infinity;
 
@@ -709,7 +709,7 @@
                     params.M2 = parseFloat(document.getElementById('double-M2').value);
                     params.initial_angle2_deg = parseFloat(document.getElementById('double-initial_angle2_deg').value);
                     break;
-            }
+            } 
             return params;
         }
 

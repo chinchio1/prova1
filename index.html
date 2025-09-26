@@ -371,8 +371,8 @@
             const params = {};
             pendulum.params.forEach(param => {
                 const input = document.getElementById(param.id);
-                // Convert to number based on step type (float or int)
-                params[param.id] = param.step.toString().includes('.') ? parseFloat(input.value) : parseInt(input.value);
+                // Corrected: Always parse as float for physical quantities
+                params[param.id] = parseFloat(input.value);
             });
 
             try {
